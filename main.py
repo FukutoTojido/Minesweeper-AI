@@ -119,12 +119,19 @@ class Grid:
                 print(col.getValue(), end = " ")
             print('\n')
 
+    def getState(self):
+        for square in self.unknown:
+            if square.type == SquareType.MARKED:
+                print("1", end = "")
+            if square.type == SquareType.OPENED:
+                print("0", end = "")
+
     def solve(self, verbose = False):
         if verbose:
             print("Start solving with Depth First Search")
         start_time = time.perf_counter()
 
-        if (self.dfs(0) == 0):
+        if (self.dfs(0, verbose) == 0):
             if verbose:
                 print("Cannot find solution")
             return -1
@@ -141,16 +148,21 @@ class Grid:
 
         return length
 
-    def dfs(self, height):
+    def dfs(self, height, verbose = False):
         if height >= len(self.unknown): 
-            return self.evaluate()
+            eval = self.evaluate()
+            if verbose:
+                print("State:", end=" ")
+                self.getState()
+                print(f"\tEvaluation: {eval}")
+            return eval
         
         self.grid[self.unknown[height].x][self.unknown[height].y].open()
-        if (self.dfs(height + 1) == 1):
+        if (self.dfs(height + 1, verbose) == 1):
             return 1
         
         self.grid[self.unknown[height].x][self.unknown[height].y].mark()
-        if (self.dfs(height + 1) == 1):
+        if (self.dfs(height + 1, verbose) == 1):
             return 1
         
         return 0
@@ -345,8 +357,8 @@ def benchmark():
             ga_accm += ga
 
         print(f"{type} benchmark:")
-        print(f"└ DFS: {(dfs_accm / len(inputs[type]) * 100):.4f} seconds avg.")
-        print(f"└ GA:  {(ga_accm / len(inputs[type]) * 100):.4f} seconds avg.")
+        print(f"└ DFS: {(dfs_accm / len(inputs[type])):.4f} seconds avg.")
+        print(f"└ GA:  {(ga_accm / len(inputs[type])):.4f} seconds avg.")
 
         if perf_accm / len(inputs[type]) > 0:
             print(f"└ \033[92m {(perf_accm / len(inputs[type]) * 100):.4f}% \033[00m boost avg.")
